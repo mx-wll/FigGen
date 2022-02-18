@@ -11,15 +11,21 @@ figma.showUI(__html__, { width: 232, height: 208 });
 // Calls to "parent.postMessage" from within the HTML page will trigger this
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
+
+let currentSelection = figma.currentPage.selection
+
+figma.ui.postMessage({
+	value: {
+		currentSelectionWidth: currentSelection[0].width,
+		currentSelectionHeight: currentSelection[0].height,
+	}
+})
+
 figma.ui.onmessage = msg => {
 	// One way of distinguishing between different types of messages sent from
 	// your HTML page is to use an object with a "type" property like this.
 
-	let currentSelection = figma.currentPage.selection
-
 	if (msg.type === 'create-shapes') {
-
-		console.log(msg)
 
 		// Set degrees
 		let degreesSet = true
@@ -30,8 +36,11 @@ figma.ui.onmessage = msg => {
 		containerFrame.name = "Container"
 		containerFrame.x = currentSelection[0].x + currentSelection[0].width + 50;
 		containerFrame.y = currentSelection[0].y + currentSelection[0].width + 50;
-		containerFrame.resize(msg.count * msg.spacing, msg.count * msg.spacing);
-		containerFrame.paddingLeft = msg.spacing;
+
+		// added +1 bc of error... might be solved better with error handling
+		// frame has to resized according to what the content is
+		containerFrame.resize(msg.count * msg.spacing + 1, msg.count * msg.spacing + 1);
+		containerFrame.paddingLeft = msg.spacing + 1;
 
 		for (let j = 0; j < msg.count; j++) {
 
