@@ -14,7 +14,7 @@ function generateArtboard() {
         figma.closePlugin();
     }
     else {
-        figma.showUI(__html__, { width: 232, height: 208 });
+        figma.showUI(__html__, { width: 232, height: 300 });
         figma.ui.postMessage({
             value: {
                 currentSelectionWidth: currentSelection.width,
@@ -25,16 +25,14 @@ function generateArtboard() {
             // One way of distinguishing between different types of messages sent from
             // your HTML page is to use an object with a "type" property like this.
             if (msg.type === 'create-shapes') {
+                console.log(msg.randomDegrees);
+                // Set degrees
                 let degrees = [0, 90, -180, -90];
                 // Create a Container
-                const containerFrame = figma.createFrame();
+                let containerFrame = figma.createFrame();
                 containerFrame.name = "Container";
                 containerFrame.x = currentSelection.x + currentSelection.width + 50;
-                containerFrame.y = currentSelection.y + currentSelection.width + 50;
-                // added +1 bc of error... might be solved better with error handling
-                // frame has to resized according to what the content is
-                containerFrame.resize(msg.count * msg.spacing + 1, msg.count * msg.spacing + 1);
-                containerFrame.paddingLeft = msg.spacing + 1;
+                containerFrame.y = currentSelection.y + currentSelection.height + 50;
                 for (let j = 0; j < msg.count; j++) {
                     for (let i = 0; i < msg.count; i++) {
                         // Select Random Selection
@@ -47,7 +45,7 @@ function generateArtboard() {
                         let distanceX = (i * msg.spacing);
                         newRectangle.x = distanceX;
                         newRectangle.y = distanceY;
-                        {
+                        if (msg.randomDegrees === true) {
                             // Rotate – random 
                             const random = Math.floor(Math.random() * degrees.length);
                             // Rotate – Relative Transform
@@ -63,15 +61,25 @@ function generateArtboard() {
                             // Add Rectangle to Frame
                             containerFrame.appendChild(newRectangle);
                         }
+                        else {
+                            // Add Rectangle to Frame
+                            containerFrame.appendChild(newRectangle);
+                        }
                     }
                 }
-                /* 		for (let i = 0; i < msg.count; i++) {
-                
-                            figma.currentPage.appendChild(shape);
-                            nodes.push(shape);
-                        } */
-                //		figma.currentPage.selection = containerFrame;
-                //		figma.viewport.scrollAndZoomIntoView(containerFrame);
+                // recalculate Container Width + Height
+                let containerWidth = 0;
+                containerFrame.children.forEach(child => {
+                    console.log(child);
+                    let newContainerWidth = child.x + child.width;
+                    if (newContainerWidth > containerWidth) {
+                        containerWidth = newContainerWidth;
+                    }
+                });
+                containerFrame.resize(containerWidth, containerWidth);
+                // Select the new container + Scroll into View 
+                figma.currentPage.selection = figma.currentPage.selection.concat(containerFrame);
+                figma.viewport.scrollAndZoomIntoView(figma.currentPage.selection);
             }
             // Make sure to close the plugin when you're done. Otherwise the plugin will
             // keep running, which shows the cancel button at the bottom of the screen.

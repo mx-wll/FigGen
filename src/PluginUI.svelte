@@ -12,10 +12,12 @@
 		IconButton,
 		IconArrowLeftRight,
 		IconUpDown,
+		Checkbox,
 	} from "figma-plugin-ds-svelte";
 
 	var count = 10;
 	var spacing = 100;
+	let randomDegrees = true;
 
 	var currentSelectionWidth = [];
 	var currentSelectionHeight = [];
@@ -43,6 +45,7 @@
 					type: "create-shapes",
 					count: count,
 					spacing: spacing,
+					randomDegrees: randomDegrees,
 				},
 			},
 			"*"
@@ -57,9 +60,7 @@
 <div class="wrapper p-xxsmall">
 	<Label>Count</Label>
 	<Input iconText="#" bind:value={count} class="mb-xxsmall" />
-	<Label
-		>Spacing (selection: ({currentSelectionWidth}*{currentSelectionHeight}))</Label
-	>
+	<Label>Spacing</Label>
 
 	<div class="flex p-xxsmall mb-xsmall">
 		<Input
@@ -72,6 +73,10 @@
 		<IconButton on:click={spacingHeight} iconName={IconUpDown} />
 	</div>
 
+	<Checkbox bind:checked={randomDegrees}
+		>Random Rotation (0°, 90°, 180°, 270°)</Checkbox
+	>
+	<hr />
 	<div class="flex p-xxsmall mb-xsmall">
 		<Button on:click={cancel} variant="secondary" class="mr-xsmall"
 			>Cancel</Button
