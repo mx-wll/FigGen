@@ -11,13 +11,41 @@
 		Icon,
 		IconButton,
 		IconArrowLeftRight,
+		IconBlend,
 		IconUpDown,
 		Checkbox,
+		SelectMenu,
 	} from "figma-plugin-ds-svelte";
+
+	// Menu for choosing mode
+	let menuItemArray = [
+		{
+			value: "item1",
+			label: "Randomize Artboards",
+			group: null,
+			selected: false,
+		},
+		{
+			value: "item2",
+			label: "Combine Artboards",
+			group: null,
+			selected: false,
+		},
+	];
+	var selectedItem = menuItemArray[0];
 
 	var count = 10;
 	var spacing = 100;
 	let randomDegrees = true;
+
+	function setNFTMode() {
+		if (selectedItem === menuItemArray[1]) {
+			spacing = 0;
+			randomDegrees = false;
+		} else {
+			return;
+		}
+	}
 
 	var currentSelectionWidth = [];
 	var currentSelectionHeight = [];
@@ -46,6 +74,7 @@
 					count: count,
 					spacing: spacing,
 					randomDegrees: randomDegrees,
+					selectedItem: selectedItem,
 				},
 			},
 			"*"
@@ -58,25 +87,36 @@
 </script>
 
 <div class="wrapper p-xxsmall">
+	<SelectMenu
+		on:change={setNFTMode}
+		bind:menuItems={menuItemArray}
+		bind:value={selectedItem}
+	/>
+
 	<Label>Count</Label>
 	<Input iconText="#" bind:value={count} class="mb-xxsmall" />
-	<Label>Spacing</Label>
 
+	<Label>Spacing</Label>
 	<div class="flex p-xxsmall mb-xsmall">
 		<Input
+			disabled={selectedItem === menuItemArray[1]}
 			iconText="#"
 			bind:value={spacing}
 			type="number"
 			class="mb-xxsmall"
 		/>
-		<IconButton on:click={spacingWidth} iconName={IconArrowLeftRight} />
-		<IconButton on:click={spacingHeight} iconName={IconUpDown} />
+		{#if selectedItem === menuItemArray[0]}
+			<IconButton on:click={spacingWidth} iconName={IconArrowLeftRight} />
+			<IconButton on:click={spacingHeight} iconName={IconUpDown} />
+		{/if}
 	</div>
 
-	<Checkbox bind:checked={randomDegrees}
+	<Checkbox
+		disabled={selectedItem === menuItemArray[1]}
+		bind:checked={randomDegrees}
 		>Random Rotation (0°, 90°, 180°, 270°)</Checkbox
 	>
-	<hr />
+
 	<div class="flex p-xxsmall mb-xsmall">
 		<Button on:click={cancel} variant="secondary" class="mr-xsmall"
 			>Cancel</Button
