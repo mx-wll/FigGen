@@ -27,20 +27,41 @@ function generateArtboard() {
             let noFill = [];
             // Set degrees
             let degrees = [0, 90, -180, -90];
+            // Reposition Artboards according to Selection
+            function repositionArtboard(container) {
+                container.x = currentSelection.x;
+                figma.currentPage.selection.forEach(child => {
+                    if (child.height + child.y + 50 > container.y) {
+                        container.y = child.height + child.y + 50;
+                    }
+                });
+            }
+            // Rotate – random 
+            function randomDegrees(container) {
+                const random = Math.floor(Math.random() * degrees.length);
+                // Rotate – Relative Transform
+                let angle = degrees[random];
+                let theta = angle * (Math.PI / 180);
+                // Radians
+                let cx = container.x + container.width / 2;
+                let cy = container.y + container.height / 2;
+                let newx = Math.cos(theta) * container.x + container.y * Math.sin(theta) - cy * Math.sin(theta) - cx * Math.cos(theta) + cx;
+                let newy = -Math.sin(theta) * container.x + cx * Math.sin(theta) + container.y * Math.cos(theta) - cy * Math.cos(theta) + cy;
+                container.relativeTransform = [[Math.cos(theta), Math.sin(theta), newx],
+                    [-Math.sin(theta), Math.cos(theta), newy]];
+            }
             if (msg.type === 'create-shapes') {
                 if (msg.selectedItem.value === "item2") {
-                    let containerFrame2 = figma.createFrame();
-                    containerFrame2.name = "Container2";
-                    containerFrame2.x = currentSelection.x + currentSelection.width + 50;
-                    containerFrame2.y = currentSelection.y + currentSelection.height + 50;
-                    containerFrame2.layoutMode = "HORIZONTAL";
-                    containerFrame2.counterAxisSizingMode = "AUTO";
+                    // Create auto-layout container 
+                    let containerAutoLayout = figma.createFrame();
+                    containerAutoLayout.name = "CombinedArtboards";
+                    containerAutoLayout.layoutMode = "HORIZONTAL";
+                    containerAutoLayout.counterAxisSizingMode = "AUTO";
+                    repositionArtboard(containerAutoLayout);
                     for (let j = 0; j < msg.count; j++) {
                         // Create a Container
                         let containerFrame = figma.createFrame();
                         containerFrame.name = "Container";
-                        containerFrame.x = currentSelection.x + currentSelection.width + 50;
-                        containerFrame.y = currentSelection.y + currentSelection.height + 50;
                         // Select random Artboard
                         function selectArtboard(random) {
                             return Math.floor(Math.random() * random.children.length);
@@ -57,15 +78,14 @@ function generateArtboard() {
                             element.y = 0;
                         });
                         containerFrame.resize(containerFrame.children[0].width, containerFrame.children[0].height);
-                        containerFrame2.appendChild(containerFrame);
+                        containerAutoLayout.appendChild(containerFrame);
                     }
                 }
                 else {
                     // Create a Container
                     let containerFrame = figma.createFrame();
-                    containerFrame.name = "Container";
-                    containerFrame.x = currentSelection.x + currentSelection.width + 50;
-                    containerFrame.y = currentSelection.y + currentSelection.height + 50;
+                    containerFrame.name = "RandomArtboards";
+                    repositionArtboard(containerFrame);
                     for (let j = 0; j < msg.count; j++) {
                         for (let i = 0; i < msg.count; i++) {
                             // Select Random Selection
@@ -79,18 +99,7 @@ function generateArtboard() {
                             newRectangle.x = distanceX;
                             newRectangle.y = distanceY;
                             if (msg.randomDegrees === true) {
-                                // Rotate – random 
-                                const random = Math.floor(Math.random() * degrees.length);
-                                // Rotate – Relative Transform
-                                let angle = degrees[random];
-                                let theta = angle * (Math.PI / 180);
-                                // Radians
-                                let cx = newRectangle.x + newRectangle.width / 2;
-                                let cy = newRectangle.y + newRectangle.height / 2;
-                                let newx = Math.cos(theta) * newRectangle.x + newRectangle.y * Math.sin(theta) - cy * Math.sin(theta) - cx * Math.cos(theta) + cx;
-                                let newy = -Math.sin(theta) * newRectangle.x + cx * Math.sin(theta) + newRectangle.y * Math.cos(theta) - cy * Math.cos(theta) + cy;
-                                newRectangle.relativeTransform = [[Math.cos(theta), Math.sin(theta), newx],
-                                    [-Math.sin(theta), Math.cos(theta), newy]];
+                                randomDegrees(newRectangle);
                                 // Add Rectangle to Frame
                                 containerFrame.appendChild(newRectangle);
                             }
@@ -103,11 +112,8 @@ function generateArtboard() {
                     // recalculate Container Width + Height
                     let containerWidth = 0;
                     containerFrame.children.forEach(child => {
-                        console.log(child);
-                        let newContainerWidth = child.x + child.width;
-                        if (newContainerWidth > containerWidth) {
-                            containerWidth = newContainerWidth;
-                        }
+                        containerWidth = containerWidth + child.width / msg.count;
+                        console.log(containerWidth);
                     });
                     containerFrame.resize(containerWidth, containerWidth);
                     // Select the new container + Scroll into View 
@@ -122,3 +128,4 @@ function generateArtboard() {
         };
     }
 }
+//# sourceMappingURL=code.js.map

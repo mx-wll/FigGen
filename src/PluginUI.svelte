@@ -17,7 +17,11 @@
 		SelectMenu,
 	} from "figma-plugin-ds-svelte";
 
-	// Menu for choosing mode
+	var count = 10;
+	var spacing = 100;
+	let randomDegrees = true;
+
+	// Menu for choosing mMde
 	let menuItemArray = [
 		{
 			value: "item1",
@@ -34,11 +38,8 @@
 	];
 	var selectedItem = menuItemArray[0];
 
-	var count = 10;
-	var spacing = 100;
-	let randomDegrees = true;
-
-	function setNFTMode() {
+	// Deactivate Controls for Combine Artboards Mode
+	function setCombineMode() {
 		if (selectedItem === menuItemArray[1]) {
 			spacing = 0;
 			randomDegrees = false;
@@ -47,15 +48,16 @@
 		}
 	}
 
-	var currentSelectionWidth = [];
-	var currentSelectionHeight = [];
-
 	onmessage = (event) => {
 		currentSelectionWidth =
 			event.data.pluginMessage.value.currentSelectionWidth;
 		currentSelectionHeight =
 			event.data.pluginMessage.value.currentSelectionHeight;
 	};
+
+	// Set Height & Width
+	var currentSelectionWidth = [];
+	var currentSelectionHeight = [];
 
 	function spacingWidth() {
 		spacing = currentSelectionWidth;
@@ -64,6 +66,7 @@
 		spacing = currentSelectionHeight;
 	}
 
+	// Send from UI to Code
 	function createShapes() {
 		count = parseInt(count);
 		spacing = parseInt(spacing);
@@ -88,7 +91,7 @@
 
 <div class="wrapper p-xxsmall">
 	<SelectMenu
-		on:change={setNFTMode}
+		on:change={setCombineMode}
 		bind:menuItems={menuItemArray}
 		bind:value={selectedItem}
 	/>
@@ -110,10 +113,9 @@
 			<IconButton on:click={spacingHeight} iconName={IconUpDown} />
 		{/if}
 	</div>
-
-	<Checkbox
-		disabled={selectedItem === menuItemArray[1]}
-		bind:checked={randomDegrees}
+	<!-- disabled={selectedItem === menuItemArray[1]}
+ -->
+	<Checkbox bind:checked={randomDegrees}
 		>Random Rotation (0°, 90°, 180°, 270°)</Checkbox
 	>
 
