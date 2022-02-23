@@ -113,9 +113,10 @@
 			<IconButton on:click={spacingHeight} iconName={IconUpDown} />
 		{/if}
 	</div>
-	<!-- disabled={selectedItem === menuItemArray[1]}
- -->
-	<Checkbox bind:checked={randomDegrees}
+
+	<Checkbox
+		bind:checked={randomDegrees}
+		disabled={selectedItem === menuItemArray[1]}
 		>Random Rotation (0°, 90°, 180°, 270°)</Checkbox
 	>
 
